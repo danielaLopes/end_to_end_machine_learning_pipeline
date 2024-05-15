@@ -2,7 +2,7 @@ import datetime
 from typing import Optional
 import fire
 import pandas as pd
-import os
+import traceback
 
 from etl import cleaning, load, extract, validation
 import utils
@@ -14,7 +14,7 @@ def run(
     export_end_reference_datetime: Optional[datetime.datetime] = None,
     days_delay: int = 10,
     days_export: int = 60,
-    feature_group_version: int = 1,
+    feature_group_version: int = 2,
 ) -> dict:
     """
     Extract data from the csv file, transform it, and load it to the feature store.
@@ -50,6 +50,15 @@ def run(
     validation_expectation_suite = validation.build_expectation_suite()
     logger.info("Successfully built validation expectation suite.")
 
+    try:
+        logger.info(f"Check validation failures.")
+        validation.check_validation_failures(data, 
+                                            validation_expectation_suite)
+        logger.info(f"Successfully checked validation failures.")
+    except ValueError as e:
+        logger.error(traceback.format_exc())
+        exit(1)
+
     logger.info(f"Validating data and loading it to the feature store.")
     load.to_feature_store(
         data,
@@ -74,6 +83,8 @@ def transform(data: pd.DataFrame):
     data = cleaning.rename_columns(data)
     data = cleaning.cast_columns(data)
     data = cleaning.generate_image_hash(data)
+    data = cleaning.remove_duplicate_images(data)
+    logger.info(f"Transformed data: {data}")
 
     return data
 

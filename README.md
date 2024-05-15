@@ -10,3 +10,17 @@ End to end architecture and deployment of machine learning models.
 
 
 
+### Setup
+```
+pip3 install -e .
+```
+
+
+### Steps
+```
+python3 settings.py
+python3 pipeline.py
+
+```
+
+

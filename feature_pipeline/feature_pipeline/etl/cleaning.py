@@ -22,12 +22,10 @@ def rename_columns(df: pd.DataFrame) -> pd.DataFrame:
     )
     # Feature names need to start with a letter
     columns_to_rename = [str(i) for i in range(globals.NUM_IMAGE_FEATURES) if str(i) in data.columns]
-    rename_dict = {col: f'px{col}' for col in columns_to_rename}
+    rename_dict = {col: f'f{col}' for col in columns_to_rename}
 
     data.rename(columns=rename_dict, 
                 inplace=True)
-    
-    logger.info(f"New columns: {data.columns}")
 
     return data
 
@@ -61,7 +59,27 @@ def generate_image_hash(df: pd.DataFrame) -> pd.DataFrame:
 
     data = df.copy()
     
-    pixel_columns = [f'px{i}' for i in range(globals.NUM_IMAGE_FEATURES) if f'px{i}' in data.columns]
+    pixel_columns = [f'f{i}' for i in range(globals.NUM_IMAGE_FEATURES) if f'f{i}' in data.columns]
     data['image_hash'] = data[pixel_columns].apply(_hash_image_pixels, axis=1)
 
+    # Reorder columns so that feature columns come last
+    data = data[['label', 'datetime_utc', 'image_hash'] + pixel_columns]
+
     return data
+
+
+def remove_duplicate_images(df: pd.DataFrame, column_name='image_hash') -> pd.DataFrame:
+    """
+    Removes rows with duplicate values in the specified column.
+
+    Parameters:
+    - df: pd.DataFrame - The DataFrame to process.
+    - column_name: str - The name of the column to check for duplicate values.
+      Default is 'image_hash'.
+
+    Returns:
+    - A new DataFrame with duplicates removed.
+    """
+    # Remove duplicates, keeping the first occurrence
+    unique_df = df.drop_duplicates(subset=[column_name], keep='first')
+    return unique_df

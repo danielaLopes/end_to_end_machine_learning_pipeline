@@ -1,0 +1,1 @@
+{"days_delay": 10, "days_export": 60, "export_datetime_utc_start": "2024-04-12 14:00", "export_datetime_utc_end": "2024-06-11 14:00", "datetime_format": "%Y-%m-%d %H:%M", "num_unique_samples_per_time_series": 1440, "feature_group_version": 2}

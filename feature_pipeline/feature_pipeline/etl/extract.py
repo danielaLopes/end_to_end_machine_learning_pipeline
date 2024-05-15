@@ -6,7 +6,6 @@ import pandas as pd
 from feature_pipeline.globals import globals
 import feature_pipeline.feature_pipeline.utils as utils
 
-
 logger = utils.get_logger(__name__)
 
 

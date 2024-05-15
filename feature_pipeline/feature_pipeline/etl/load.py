@@ -4,7 +4,10 @@ from great_expectations.core import ExpectationSuite
 from hsfs.feature_group import FeatureGroup
 
 from feature_pipeline.feature_pipeline.settings import SETTINGS
-import feature_pipeline.globals as globals
+from feature_pipeline.globals import globals
+import feature_pipeline.feature_pipeline.utils as utils
+
+logger = utils.get_logger(__name__)
 
 
 def to_feature_store(
@@ -35,6 +38,7 @@ def to_feature_store(
         online_enabled=False,
         expectation_suite=validation_expectation_suite,
     )
+    logger.info(data)
     # Upload data.
     feature_group.insert(
         features=data,
@@ -71,20 +75,20 @@ def to_feature_store(
 
     # Assuming your dataset includes images represented as flattened pixel arrays,
     # you might also want to describe a generalized pixel feature:
-    pixel_feature_template = {
-        "name": "pixel_{index}",
-        "description": "The intensity value of pixel {index}, as an integer in the range [0, 255].",
-        "validation_rules": ">=0 and <=255 (int)",
+    feature_template = {
+        "name": "f{index}",
+        "description": "Feature {index} as a floating-point value.",
+        "validation_rules": "Any float value",
     }
 
     # Dynamically generate pixel feature descriptions for a 100x100 image
     for i in range(globals.NUM_IMAGE_FEATURES):  # Assuming images are 100x100 pixels, flattened
-        pixel_feature = {
-            "name": pixel_feature_template["name"].format(index=i),
-            "description": pixel_feature_template["description"].format(index=i),
-            "validation_rules": pixel_feature_template["validation_rules"],
+        feature = {
+            "name": feature_template["name"].format(index=i),
+            "description": feature_template["description"].format(index=i),
+            "validation_rules": feature_template["validation_rules"],
         }
-        feature_descriptions.append(pixel_feature)
+        feature_descriptions.append(feature)
 
     for description in feature_descriptions:
         feature_group.update_feature_description(
